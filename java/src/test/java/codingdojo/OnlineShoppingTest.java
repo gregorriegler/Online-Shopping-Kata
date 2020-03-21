@@ -1,6 +1,7 @@
 package codingdojo;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +45,7 @@ public class OnlineShoppingTest {
     }
 
     @Test
+    @Disabled("general test WIP")
     public void switchStore() throws Exception {
         DeliveryInformation deliveryInfo = new DeliveryInformation("HOME_DELIVERY", nordstan, 60);
         deliveryInfo.setDeliveryAddress("NEARBY");
@@ -65,7 +67,21 @@ public class OnlineShoppingTest {
         // assertEquals("DRONE", ((DeliveryInformation)session.get("DELIVERY_INFO")).getType());
 
     }
+    
+    /*
+     * Test Fall: happy path
+     * - DRONE_DELIVERY selected
+     * - weight is 400
+     * - pickup is a store
+     * - new store supports DRONE
+     * - address is set
+     * - location is NEARBY
+     * - new store supports DRONE
+     * => update the pickupLocation to the new store
 
-
+     * The central warehouse does not support Drone delivery
+     * - valid drone delivery
+     * => set to SHIPPING
+     */
 
 }
