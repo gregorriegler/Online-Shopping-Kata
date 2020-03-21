@@ -45,6 +45,34 @@ public class OnlineShopping {
         if (cart == null) {
             return;
         }
+        long weight = switchCartTo(storeToSwitchTo, cart);
+
+        if (deliveryInformation != null) {
+            switchDeliveryTo(storeToSwitchTo, deliveryInformation, currentStore, locationService, weight);
+        }
+    }
+
+    private void switchDeliveryTo(Store storeToSwitchTo, DeliveryInformation deliveryInformation, Store currentStore, LocationService locationService, long weight) {
+        if (deliveryInformation.getType() != null
+            && "HOME_DELIVERY".equals(deliveryInformation.getType())
+            && deliveryInformation.getDeliveryAddress() != null) {
+            if (!locationService.isWithinDeliveryRange(storeToSwitchTo, deliveryInformation.getDeliveryAddress())) {
+                deliveryInformation.setType("PICKUP");
+                deliveryInformation.setPickupLocation(currentStore);
+            } else {
+                deliveryInformation.setTotalWeight(weight);
+                deliveryInformation.setPickupLocation(storeToSwitchTo);
+            }
+        } else if (deliveryInformation.getDeliveryAddress() != null) {
+            if (locationService.isWithinDeliveryRange(storeToSwitchTo, deliveryInformation.getDeliveryAddress())) {
+                deliveryInformation.setType("HOME_DELIVERY");
+                deliveryInformation.setTotalWeight(weight);
+                deliveryInformation.setPickupLocation(storeToSwitchTo);
+            }
+        }
+    }
+
+    private long switchCartTo(Store storeToSwitchTo, Cart cart) {
         ArrayList<Item> newItems = new ArrayList<>();
         long weight = 0;
         for (Item item : cart.getItems()) {
@@ -66,44 +94,29 @@ public class OnlineShopping {
         for (Item item : newItems) {
             cart.addItem(item);
         }
-
-        if (deliveryInformation != null
-                && deliveryInformation.getType() != null
-                && "HOME_DELIVERY".equals(deliveryInformation.getType())
-                && deliveryInformation.getDeliveryAddress() != null) {
-            if (!locationService.isWithinDeliveryRange(storeToSwitchTo, deliveryInformation.getDeliveryAddress())) {
-                deliveryInformation.setType("PICKUP");
-                deliveryInformation.setPickupLocation(currentStore);
-            } else {
-                deliveryInformation.setTotalWeight(weight);
-                deliveryInformation.setPickupLocation(storeToSwitchTo);
-            }
-        } else {
-            if (deliveryInformation != null
-                    && deliveryInformation.getDeliveryAddress() != null) {
-                if (locationService.isWithinDeliveryRange(storeToSwitchTo, deliveryInformation.getDeliveryAddress())) {
-                    deliveryInformation.setType("HOME_DELIVERY");
-                    deliveryInformation.setTotalWeight(weight);
-                    deliveryInformation.setPickupLocation(storeToSwitchTo);
-
-                }
-            }
-        }
+        return weight;
     }
 
     private void switchToCentralWarehouse(Cart cart, DeliveryInformation deliveryInformation) {
         if (cart != null) {
-            for (Item item : cart.getItems()) {
-                if ("EVENT".equals(item.getType())) {
-                    cart.markAsUnavailable(item);
-                }
-            }
-
+            switchCartToCentralWarehouse(cart);
         }
         if (deliveryInformation != null) {
-            deliveryInformation.setType("SHIPPING");
-            deliveryInformation.setPickupLocation(null);
+            switchDeliveryToShipping(deliveryInformation);
         }
+    }
+
+    private void switchCartToCentralWarehouse(Cart cart) {
+        for (Item item : cart.getItems()) {
+            if ("EVENT".equals(item.getType())) {
+                cart.markAsUnavailable(item);
+            }
+        }
+    }
+
+    private void switchDeliveryToShipping(DeliveryInformation deliveryInformation) {
+        deliveryInformation.setType("SHIPPING");
+        deliveryInformation.setPickupLocation(null);
     }
 
     @Override
