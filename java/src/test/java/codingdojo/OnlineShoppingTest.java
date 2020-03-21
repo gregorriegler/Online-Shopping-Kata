@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OnlineShoppingTest {
@@ -20,6 +22,7 @@ public class OnlineShoppingTest {
     private Item masterclass;
     private Item makeoverNordstan;
     private Item makeoverBackaplan;
+    private LocationService locationService = new LocationService();
 
     @BeforeEach
     public void setUp() {
@@ -40,8 +43,33 @@ public class OnlineShoppingTest {
         masterclass = new StoreEvent("Eyeshadow Masterclass", nordstan);
         makeoverNordstan = new StoreEvent("Makeover", nordstan);
         makeoverBackaplan = new StoreEvent("Makeover", backaplan);
+    }
 
+    /**
+     * Test Fall: happy path
+     * - DRONE_DELIVERY selected
+     * - weight is 400
+     * - pickup is a store
+     * - new store supports DRONE
+     * - address is set
+     * - location is NEARBY
+     * - new store supports DRONE
+     * => update the pickupLocation to the new store
+     */
+    @Test
+    public void switchDroneDeliveryToAnotherDroneDeliveryStore() throws Exception {
+        DeliveryInformation deliveryInfo = new DeliveryInformation("DRONE", nordstan, 60);
+        deliveryInfo.setDeliveryAddress("NEARBY");
 
+        Cart cart = new Cart();
+        cart.addItem(cherryBloom);
+
+        OnlineShopping shopping = new OnlineShopping(new Session());
+
+        shopping.switchTo(backaplan, cart, deliveryInfo, nordstan, locationService);
+
+        assertEquals("DRONE", deliveryInfo.getType());
+        assertEquals("Backaplan", deliveryInfo.getPickupLocation().getName());
     }
 
     @Test
@@ -67,18 +95,9 @@ public class OnlineShoppingTest {
         // assertEquals("DRONE", ((DeliveryInformation)session.get("DELIVERY_INFO")).getType());
 
     }
-    
-    /*
-     * Test Fall: happy path
-     * - DRONE_DELIVERY selected
-     * - weight is 400
-     * - pickup is a store
-     * - new store supports DRONE
-     * - address is set
-     * - location is NEARBY
-     * - new store supports DRONE
-     * => update the pickupLocation to the new store
 
+
+    /*
      * The central warehouse does not support Drone delivery
      * - valid drone delivery
      * => set to SHIPPING

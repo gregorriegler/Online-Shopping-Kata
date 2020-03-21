@@ -24,6 +24,10 @@ public class Store implements ModelObject {
         }
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void addStoreEvent(StoreEvent storeEvent) {
         this.itemsInStock.put(storeEvent.getName(), storeEvent);
     }

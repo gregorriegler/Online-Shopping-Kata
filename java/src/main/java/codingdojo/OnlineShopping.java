@@ -40,7 +40,7 @@ public class OnlineShopping {
         session.saveAll();
     }
 
-    private void switchTo(Store storeToSwitchTo, Cart cart, DeliveryInformation deliveryInformation, Store currentStore, LocationService locationService) {
+    protected void switchTo(Store storeToSwitchTo, Cart cart, DeliveryInformation deliveryInformation, Store currentStore, LocationService locationService) {
         if (cart == null) {
             return;
         }

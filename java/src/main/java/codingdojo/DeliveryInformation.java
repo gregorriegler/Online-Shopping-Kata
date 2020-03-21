@@ -37,6 +37,10 @@ public class DeliveryInformation implements ModelObject {
         this.pickupLocation = store;
     }
 
+    public Store getPickupLocation() {
+        return pickupLocation;
+    }
+
     public void setTotalWeight(long weight) {
         this.weight = weight;
     }
